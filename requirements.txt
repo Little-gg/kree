@@ -1,0 +1,8 @@
+ansible==1.9.5
+flask
+flask-restful
+flask-restful-extend
+requests
+celery
+redis
+envoy
