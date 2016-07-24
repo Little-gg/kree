@@ -25,3 +25,18 @@
 > GET '/<task_id>'
 > RESPONSE {id: <task_id>, state: <task_state>, result: <task_result>}
 
+# Run
+Start redis server:
+```
+$ redis-server
+```
+Start celery worker:
+```
+$ python -A main.celery worker
+```
+
+Start API server:
+```
+$ python run.py
+```
+
