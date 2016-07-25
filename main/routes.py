@@ -21,7 +21,8 @@ class List_playbooks(Resource):
 class Playbook_detail(Resource):
     def get(self, playbook):
         job = NoParamJob(playbook)
-        return {'name': playbook, 'description': job.get_detail()}
+        return {'name': playbook, 'description': job.get_detail(),
+                'available_methods': job.available_methods()}
 
 
 @api.route('/task')

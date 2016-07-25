@@ -30,7 +30,7 @@ def execute(command, stream):
         nextline = process.stdout.readline()
         if nextline == '' and process.poll() is not None:
             break
-        sys.stdout.write(nextline)
+        sys.stdout.write(str(nextline))
         sys.stdout.flush()
     sys.stdout = sys.__stdout__
     f.close()

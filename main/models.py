@@ -6,7 +6,9 @@ from path_utils import *
 from tasks import invoke, check_task_result
 from tempfile import NamedTemporaryFile
 from . import logger
+from . import app
 import ast
+import re
 
 
 class Task(object):
@@ -33,11 +35,22 @@ class NoParamJob(NullJob):
     def get_detail(self):
         try:
             f = open("%s/README.md" % self.path(), 'r')
-            detail = f.readlines()
+            detail = f.read().splitlines()
             f.close()
             return detail
         except:
             return 'Open readme failed!'
+
+    def available_methods(self):
+        methods = []
+        method_path = get_playbook_dir(self.name)
+        for dirpath,dirnames,filenames in os.walk(method_path.encode('utf-8')):
+            depth = dirpath.count(os.path.sep) - app.config['ANSIBLE_PLAYBOOK_ROOT'].count(os.path.sep)
+            if depth == 1:
+                for file in filenames:
+                    if re.search('.yml$', file):
+                        methods.append(file)
+        return methods
 
 
 class Job(NoParamJob):

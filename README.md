@@ -6,7 +6,10 @@
 
 ## List playbook detail
 > GET '/<playbook>'
+
+## Request playbook available methods
 > GET '/<playbook>/detail'
+> RESPONSE {name: <playbook>, description: <description>, available_methods: <methods>}
 
 ## Invoke playbook
 > POST '/<playbook>'
@@ -32,7 +35,7 @@ $ redis-server
 ```
 Start celery worker:
 ```
-$ python -A main.celery worker
+$ celery -A main.celery worker
 ```
 
 Start API server:
