@@ -9,6 +9,7 @@ from . import logger
 from . import app
 import ast
 import re
+import json
 
 
 class Task(object):
@@ -109,7 +110,7 @@ class Job(NoParamJob):
                         inventories.append(inventory)
             return inventories[0]
         else:
-            inventory = ast.literal_eval(self.params.inventory)
+            inventory = ast.literal_eval(json.dumps(self.params.inventory))
             return self._generate_inventory(inventory)
 
     def _generate_inventory(self, inventory):

@@ -14,7 +14,7 @@ def invoke(job, cmd):
     return task_id, task_state
 
 
-@celery.task
+@celery.task(time_limit=86400)
 def invoke_task(job_stream_file, cmd):
     result = execute(cmd, job_stream_file)
     return result
@@ -42,7 +42,7 @@ def execute(command, stream):
     return output
 
 
-@celery.task
+@celery.task(time_limit=86400)
 def check_task_result(task_id):
     task = check_task_result.AsyncResult(task_id)
     result = ''
