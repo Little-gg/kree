@@ -1,8 +1,10 @@
-ansible==1.9.5
+ansible==2.1.1
 flask
 flask-restful
 flask-restful-extend
 requests
 celery
 redis
-envoy
+pytz
+billiard
+kombu

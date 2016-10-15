@@ -1,20 +1,16 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+import types
 from flask_restful import Api
 from flask import Flask
-import types
-import sys
+from config.logger import Log
 
+log = Log.getLogger(__name__)
 
 app = Flask(__name__)
 api = Api(app)
-app.config.from_pyfile('config.py')
-
-
-import logging
-app.logger.addHandler(logging.StreamHandler(sys.stdout))
-logger = app.logger
+app.config.from_pyfile('config/config.py')
 
 
 def api_route(self, *args, **kwargs):
@@ -27,7 +23,6 @@ def api_route(self, *args, **kwargs):
 api.route = types.MethodType(api_route, api)
 
 
-from plugin import make_celery
+from task_server import make_celery
 celery = make_celery(app)
 from routes import *
-

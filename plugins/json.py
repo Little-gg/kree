@@ -1,0 +1,173 @@
+# (c) 2016, Little_gg <chenguanji at vanecloud.com>
+#
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+from __future__ import (absolute_import, division, print_function)
+__metaclass__ = type
+
+import datetime
+import ast
+import json
+import requests
+from redis import StrictRedis
+
+redis = StrictRedis('localhost', {'port', '6379'})
+
+from ansible.plugins.callback import CallbackBase
+
+requests.adapters.DEFAULT_RETRIES = 1
+
+class Time(object):
+    def __new__(cls):
+        return datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+
+
+class CallbackModule(CallbackBase):
+    CALLBACK_VERSION = 2.0
+#    CALLBACK_TYPE = 'stdout'
+    CALLBACK_NAME = 'json'
+
+    def __init__(self, display=None):
+        super(CallbackModule, self).__init__(display)
+        self.results = []
+
+    def _log_event(self, data):
+        #  queue = Rds('job-036b2a11-90fa-11e6-8d0c-f45c898f9bdf')
+        #  queue_data = queue.getter()
+        #  queue_data['step_result'] = dict(data)
+        #  queue_data['update_time'] = Time()
+        #  queue.setter[queue_data]
+        self.rest_api_path = 'http://localhost:5000/callback/%s' % self.task_id
+        requests.post(self.rest_api_path, data=json.dumps(data), headers = {'content-type': 'application/json'})
+
+    def _push_task_event(self, event_type, *args, **kwargs):
+        if event_type in 'play_start':
+            data = {
+                    'timestamp': Time(),
+                    'connection_group': str(kwargs['play']),
+                    'event_type': event_type,
+                    }
+            self._log_event(data)
+
+        if event_type in 'task_start':
+            data = {
+                    'timestamp': Time(),
+                    'task': str(kwargs['task']),
+                    'event_type': event_type,
+                    }
+            self._log_event(data)
+
+        if event_type in 'runner_ok':
+            event_data = kwargs['result']
+            if event_data.has_key('ansible_facts'):
+                data = {
+                        'timestamp': Time(),
+                        'task_result': 'fact',
+                        'event_type': 'gathering_fact',
+                        }
+            else:
+                if event_data.has_key('msg'):
+                    data = {
+                        'timestamp': Time(),
+                        'task_result': 'success',
+                        'task_msg': event_data['msg'],
+                        'event_type': 'task_result',
+                        }
+                else:
+                    data = {
+                        'timestamp': Time(),
+                        'task_result': 'success',
+                        'task_msg': '',
+                        'event_type': 'task_result',
+                        }
+            self._log_event(data)
+
+        if event_type in 'runner_failed':
+            event_data = kwargs['result']
+            data = {
+                        'timestamp': Time(),
+                        'task_result': 'failed',
+                        'task_msg': event_data['msg'],
+                        'event_type': 'task_result',
+                        }
+            self._log_event(data)
+
+        if event_type in 'runner_unreachable':
+            event_data = kwargs['result']
+            data = {
+                        'timestamp': Time(),
+                        'task_result': 'unreachable',
+                        'event_type': 'task_result',
+                        }
+            self._log_event(data)
+
+        if event_type in 'on_stats':
+            result_data = kwargs['stats'].__dict__
+            if len(result_data['dark']) or len(result_data['failures']):
+                result = 'failed'
+            else:
+                result = 'success'
+            data = {
+                    'timestamp': Time(),
+                    'stats': result_data,
+                    'result': result,
+                    'event_type': 'play_result',
+                    }
+            self._log_event(data)
+
+    def _new_play(self, play):
+        return {
+            'play': {
+                'name': play.name,
+                'id': str(play._uuid)
+            },
+            'tasks': []
+        }
+
+    def _new_task(self, task):
+        return {
+            'task': {
+                'name': task.name,
+                'id': str(task._uuid)
+            },
+            'hosts': {}
+        }
+
+    def v2_playbook_on_play_start(self, play):
+        if not hasattr(self, 'task_id'):
+            self.task_id = play._variable_manager.__dict__['_extra_vars']['api_job_task_id']
+        self.results.append(self._new_play(play))
+        self._push_task_event('play_start', play=play)
+
+    def v2_playbook_on_task_start(self, task, is_conditional):
+        self.results[-1]['tasks'].append(self._new_task(task))
+        self._push_task_event('task_start', task=task)
+
+    def v2_runner_on_ok(self, result, **kwargs):
+        self._push_task_event('runner_ok', result=result._result)
+
+    def v2_runner_on_failed(self, result, **kwargs):
+        self._push_task_event('runner_failed', result=result._result)
+
+    def v2_runner_on_unreachable(self, result, **kwargs):
+        self._push_task_event('runner_unreachable', result=result._result)
+
+    def v2_runner_on_skipped(self, result, **kwargs):
+        self._push_task_event('runner_skipped', result=result._result)
+
+    def v2_playbook_on_stats(self, stats):
+        """Display info about playbook statistics"""
+        self._push_task_event('on_stats', stats=stats)

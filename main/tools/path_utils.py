@@ -3,7 +3,7 @@
 
 
 import os
-from . import app
+from .. import app
 
 
 def get_inventories_dir(playbook_name):

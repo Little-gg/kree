@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 from celery import Celery
+from config.logger import Log
 
 
 def make_celery(app):
@@ -18,4 +19,6 @@ def make_celery(app):
                 return TaskBase.__call__(self, *args, **kwargs)
 
     celery.Task = ContextTask
+    log = Log.getLogger(__name__)
+    log.info("Task scheduling system initiald.")
     return celery
