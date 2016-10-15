@@ -6,7 +6,7 @@ from flask_restful import Resource
 from flask import request
 from . import api
 from config.logger import Log
-from helpers import get_job_details, get_raw_log_output
+from helpers import get_job_details, get_raw_log_output, get_playbooks_list
 from queue import Rds
 from tasks import RunJob
 from uuid import uuid4
@@ -18,7 +18,8 @@ log = Log.getLogger(__name__)
 @api.route('/')
 class List_Playbooks(Resource):
     def get(self):
-        raise NotImplementedError
+        playbooks_list = get_playbooks_list()
+        return {'playbooks': playbooks_list}
 
 
 @api.route('/<playbook>')

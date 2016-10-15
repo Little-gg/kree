@@ -4,6 +4,7 @@
 from queue import Rds
 from celery import task
 from config.logger import Log
+from tools.path_utils import get_playbooks_dir
 from main import app
 import ast
 import re
@@ -14,6 +15,9 @@ log = Log.getLogger(__name__)
 class Time(object):
     def __new__(cls):
         return datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+
+def get_playbooks_list():
+    return get_playbooks_dir()
 
 
 def get_job_details(task_id):
