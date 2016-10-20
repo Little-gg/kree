@@ -30,7 +30,7 @@ class Playbook(Resource):
         job_params['playbook'] = playbook
         task_id = str(uuid4())
         job = RunJob()
-        result = job.apply_async(args=[job_params], task_id = task_id)
+        result = job.apply_async(args=[job_params], task_id = task_id, time_limit=86400)
 
         # celery task is a asynchronous call, so add a wait for redis to get message
         sleep(0.1)

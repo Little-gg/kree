@@ -114,7 +114,7 @@ class RunJob(Task):
             args.append(self.params.forks)
         if self.params.variables:
             args.append("-e")
-            args.append("'" + str(convert(self.params.variables)) + "'")
+            args.append("\"" + str(convert(self.params.variables)) + "\"")
         if self.params.start_task:
             args.append("--start-at-task")
             args.append("'" + self.param.start_task+ "'")
@@ -142,7 +142,7 @@ class RunJob(Task):
     def _build_cmd(self, args):
         cmd = app.config['ANSIBLE'] + " " + args + " " \
                 + get_playbook_dir(self.params.playbook) + "/site.yml"
-        log.debug("Ansible command: %s" % cmd)
+        log.info("Ansible command: %s" % cmd)
         return cmd
 
     def _get_file_handler(self):
