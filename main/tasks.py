@@ -112,14 +112,22 @@ class RunJob(Task):
             raise Exception("invalid inventory.")
 
     def _build_hostvars(self):
-        f = open(self.params.dict_inventory, 'r')
         content = []
         f = open(self.params.dict_inventory, 'r')
         for line in f.readlines():
             line = line.strip()
             if self.params.inventory[self.META_CODE].has_key(line):
                 for (k, v) in self.params.inventory[self.META_CODE][line].iteritems():
-                    line = line + ' ' + k + '=' + v
+                    log.debug('-----------------')
+                    log.debug(k)
+                    if k=='key':
+                        f = tempfile.NamedTemporaryFile(delete=False)
+                        log.debug(" KEY **** %s" % v)
+                        f.write(v)
+                        f.close()
+                        line = line + ' ' + 'ansible_ssh_private_key_file' + '=' + f.name
+                    else:
+                        line = line + ' ' + k + '=' + v
             content.append(line + '\n')
         f.close()
         with open(self.params.dict_inventory, 'w') as f:
@@ -138,6 +146,12 @@ class RunJob(Task):
 
         if self.params.inventory.has_key(self.META_CODE):
             self._build_hostvars()
+        elif self.params.key:
+            f = tempfile.NamedTemporaryFile(delete=False)
+            f.write(self.params.key)
+            f.close()
+            args.append("--private-key")
+            args.append(f.name)
         elif self.params.username and self.params.password:
             args.append("-e")
             args.append("'ansible_ssh_user=" + self.params.username + "'")
