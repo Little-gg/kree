@@ -36,6 +36,8 @@ def convert(data):
 class RunJob(Task):
     #  abstract = True
     name = __name__
+    LINE_INV = '_all'
+    META_CODE = '_meta'
 
     def _parse_params(self, params):
         try:
@@ -82,34 +84,49 @@ class RunJob(Task):
         self.params.inventory = eval_json_data(self.params.inventory)
         if type(self.params.inventory) != type({}):
             raise Exception("invalid inventory format.")
-        parsed_inventory = []
         #  log.debug(self.params.inventory)
-        for (key, val) in self.params.inventory.items():
-            log.debug("======== %s %s " % (key, val))
-            if type(val) == type({}):
-                f = tempfile.NamedTemporaryFile(delete=False)
-                self.params.dict_inventory = f.name
-                for (host, host_list) in val.items():
-                    f.write("[%s]\n" % host)
-                    if type(host_list) == type([]):
-                        for i in host_list:
-                            f.write("%s\n" % i)
-                    else:
-                        f.write("%s\n" % host_list)
-                f.close()
+        self.params.parsed_inventory = []
+        if self.params.inventory.has_key(self.LINE_INV):
+            # add list inventory
+            if type(self.params.inventory[self.LINE_INV]) in (type(''), type(u'')):
+                self.params.parsed_inventory = self.params.inventory[self.LINE_INV] + ","
                 return
-            parsed_inventory.append(val)
-            if type(parsed_inventory[0]) in (type(''), type(u'')):
-                self.params.parsed_inventory = parsed_inventory[0] + ","
+            elif type(self.params.inventory[self.LINE_INV]) == type([]):
+                self.params.parsed_inventory = ",".join(self.params.inventory[self.LINE_INV]) + ","
                 return
-            elif type(parsed_inventory[0]) == type([]):
-                self.params.parsed_inventory = ",".join(parsed_inventory[0]) + ","
-                return
-            else:
-                raise Exception("invalid inventory.")
+        elif type(self.params.inventory) == type({}):
+            # add dict inventory
+            f = tempfile.NamedTemporaryFile(delete=False)
+            self.params.dict_inventory = f.name
+            for (host, host_list) in self.params.inventory.iteritems():
+                if host == self.META_CODE:
+                    continue
+                f.write("[%s]\n" % host)
+                if type(host_list) == type([]):
+                    for i in host_list:
+                        f.write("%s\n" % i)
+                else:
+                    f.write("%s\n" % host_list)
+            f.close()
+        else:
+            raise Exception("invalid inventory.")
+
+    def _build_hostvars(self):
+        f = open(self.params.dict_inventory, 'r')
+        content = []
+        f = open(self.params.dict_inventory, 'r')
+        for line in f.readlines():
+            line = line.strip()
+            if self.params.inventory[self.META_CODE].has_key(line):
+                for (k, v) in self.params.inventory[self.META_CODE][line].iteritems():
+                    line = line + ' ' + k + '=' + v
+            content.append(line + '\n')
+        f.close()
+        with open(self.params.dict_inventory, 'w') as f:
+            f.writelines(content)
+        f.close()
 
     def _build_args(self):
-        log.debug(" HIT **** %s" % dir(self.params))
 
         if self.params.dict_inventory:
             log.debug(" HIT **** %s" % self.params.dict_inventory)
@@ -118,7 +135,10 @@ class RunJob(Task):
             args = ["-i \'"+ self.params.parsed_inventory + "\'"]
         args.append("-e")
         args.append("'api_job_task_id=" + self.request.id + "'")
-        if self.params.username and self.params.password:
+
+        if self.params.inventory.has_key(self.META_CODE):
+            self._build_hostvars()
+        elif self.params.username and self.params.password:
             args.append("-e")
             args.append("'ansible_ssh_user=" + self.params.username + "'")
             args.append("-e")
@@ -127,6 +147,7 @@ class RunJob(Task):
             log.debug("add ssh public key")
         else:
             raise Exception("invalid credential.")
+
         if self.params.limit:
             args.append("--limit")
             args.append(self.params.limit)
