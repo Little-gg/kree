@@ -11,6 +11,7 @@ from main import app
 from helpers import eval_json_data, Time
 import subprocess
 import collections
+import tempfile
 import sys
 
 
@@ -84,17 +85,37 @@ class RunJob(Task):
         parsed_inventory = []
         #  log.debug(self.params.inventory)
         for (key, val) in self.params.inventory.items():
-            log.debug(" %s %s " % (key, val))
+            log.debug("======== %s %s " % (key, val))
+            if type(val) == type({}):
+                f = tempfile.NamedTemporaryFile(delete=False)
+                self.params.dict_inventory = f.name
+                for (host, host_list) in val.items():
+                    f.write("[%s]\n" % host)
+                    if type(host_list) == type([]):
+                        for i in host_list:
+                            f.write("%s\n" % i)
+                    else:
+                        f.write("%s\n" % host_list)
+                f.close()
+                return
             parsed_inventory.append(val)
             if type(parsed_inventory[0]) in (type(''), type(u'')):
                 self.params.parsed_inventory = parsed_inventory[0] + ","
+                return
             elif type(parsed_inventory[0]) == type([]):
                 self.params.parsed_inventory = ",".join(parsed_inventory[0]) + ","
+                return
             else:
                 raise Exception("invalid inventory.")
 
     def _build_args(self):
-        args = ["-i \'"+ self.params.parsed_inventory + "\'"]
+        log.debug(" HIT **** %s" % dir(self.params))
+
+        if self.params.dict_inventory:
+            log.debug(" HIT **** %s" % self.params.dict_inventory)
+            args = ["-i \'"+ self.params.dict_inventory + "\'"]
+        else:
+            args = ["-i \'"+ self.params.parsed_inventory + "\'"]
         args.append("-e")
         args.append("'api_job_task_id=" + self.request.id + "'")
         if self.params.username and self.params.password:

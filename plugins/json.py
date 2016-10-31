@@ -50,7 +50,7 @@ class CallbackModule(CallbackBase):
         #  queue_data['step_result'] = dict(data)
         #  queue_data['update_time'] = Time()
         #  queue.setter[queue_data]
-        self.rest_api_path = 'http://localhost:5000/callback/%s' % self.task_id
+        self.rest_api_path = 'http://localhost/callback/%s' % self.task_id
         requests.post(self.rest_api_path, data=json.dumps(data), headers = {'content-type': 'application/json'})
 
     def _push_task_event(self, event_type, *args, **kwargs):
@@ -100,7 +100,7 @@ class CallbackModule(CallbackBase):
             data = {
                         'timestamp': Time(),
                         'task_result': 'failed',
-                        'task_msg': event_data['msg'],
+                        'task_msg': event_data['fatal'],
                         'event_type': 'task_result',
                         }
             self._log_event(data)
