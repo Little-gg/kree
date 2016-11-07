@@ -57,7 +57,9 @@ class RunJob(Task):
 
     def run(self, params, *args, **kwargs):
         log.info("Start to run job with params: %s" % params)
+        params = self._remove_empty_value(params)
         self.params = self._parse_params(params)
+        log.debug("%s" % self.params)
         self._save_job_details()
 
         ## last step: call ansible
@@ -79,6 +81,15 @@ class RunJob(Task):
         job_store.setter(job)
         log.debug(job)
         return job
+
+    def _remove_empty_value(self, params):
+        new_params = {}
+        for k, v in params.items():
+            if isinstance(v, dict):
+                v = self._remove_empty_value(v)
+            if not v in (u'', None, {}):
+                new_params[k] = v
+        return new_params
 
     def _parse_inventory(self):
         self.params.inventory = eval_json_data(self.params.inventory)
@@ -144,7 +155,7 @@ class RunJob(Task):
         args.append("-e")
         args.append("'api_job_task_id=" + self.request.id + "'")
 
-        if self.params.inventory.has_key(self.META_CODE):
+        if self.params.inventory.has_key(self.META_CODE) and not self.params.inventory.has_key(self.LINE_INV):
             self._build_hostvars()
         elif self.params.key:
             f = tempfile.NamedTemporaryFile(delete=False)
