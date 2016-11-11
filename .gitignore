@@ -63,3 +63,4 @@ target/
 
 # User Added
 playbooks/
+dump.rdb
