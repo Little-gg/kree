@@ -26,6 +26,11 @@ def get_job_details(task_id):
     rds = Rds("job-" + task_id)
     job_details = rds.getter()
     #  job_details = eval_json_data(job_details)
+    #  from celery.contrib.rdb import set_trace
+    #  set_trace()
+    # fix result is running while job has already finished issue
+    if job_details['task_state'] == 'finished' and job_details['result'] == 'running':
+        job_details['result'] = 'failed'
     return job_details
 
 #  def get_current_task_result(task_id):

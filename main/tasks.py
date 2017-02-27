@@ -77,6 +77,8 @@ class RunJob(Task):
         job['start_time'] = Time()
         job['finish_time'] = ''
         job['update_time'] = ()
+        job['last_message'] = ''
+        # job['last_message'] = {}
         job_store = Rds('job-' + str(job['task_id']))
         job_store.setter(job)
         log.debug(job)

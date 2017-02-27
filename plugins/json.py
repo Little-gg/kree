@@ -97,12 +97,21 @@ class CallbackModule(CallbackBase):
 
         if event_type in 'runner_failed':
             event_data = kwargs['result']
-            data = {
-                        'timestamp': Time(),
-                        'task_result': 'failed',
-                        'task_msg': event_data['fatal'],
-                        'event_type': 'task_result',
-                        }
+            if event_data.has_key('fatal'):
+                data = {
+                            'timestamp': Time(),
+                            'task_result': 'failed',
+                            'task_msg': event_data['fatal'],
+                            'event_type': 'task_result',
+                            }
+            else:
+                data = {
+                            'timestamp': Time(),
+                            'task_result': 'failed',
+                            'task_msg': event_data['msg'],
+                            'event_type': 'task_result',
+                            }
+      
             self._log_event(data)
 
         if event_type in 'runner_unreachable':

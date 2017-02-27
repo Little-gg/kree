@@ -99,6 +99,10 @@ class Callback(Resource):
         queue_data['update_time'] = data['timestamp']
         if data.has_key('result'):
             queue_data['result'] = data['result']
+#            if data.has_key['task_msg']:
+#                queue_data['last_message'] = data
+        if data.has_key('task_msg'):
+            queue_data['last_message'] = data['task_msg']
         queue.setter(queue_data)
         log.debug("Task event updated from callback: %s %s" % (task_id, json.dumps(queue_data)))
         #  log.debug(data)
