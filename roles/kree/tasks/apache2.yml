@@ -10,7 +10,16 @@
     - mod_wsgi
 
 - name: enable apache service and start up it
-  service:
+  systemd:
     name: httpd
     enabled: yes
-    state: started
+
+- name: disable SELinux
+  shell: setenforce 0
+
+- name: disalbe SELinux temporary
+  lineinfile:
+    dest: /etc/selinux/config
+    state: present
+    regexp: ^SELINUX=(.*)
+    line: 'SELINUX=disabled'

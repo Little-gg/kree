@@ -42,6 +42,5 @@
 - name: enable celery systemd service
   systemd:
     name: celery
-    state: started
     enabled: yes
 

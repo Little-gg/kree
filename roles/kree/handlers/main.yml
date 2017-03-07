@@ -2,6 +2,11 @@
 # handlers file for kree
 
 - name: restart apache
-  service:
+  systemd:
     name: httpd
+    state: restarted
+
+- name: restart celery
+  systemd:
+    name: celery
     state: restarted

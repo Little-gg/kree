@@ -8,6 +8,6 @@ kree_dir: /var/www/kree
 playbooks_dir: /var/www/playbooks
 celery_service: /usr/lib/systemd/system/celery.service
 celery_config: /etc/init.d/celery
-debug_level: DEBUG
-ansible_dir: /usr/bin/ansible
+debug_level: INFO
+ansible_dir: /usr/bin/ansible-playbook
 log_dir: /var/log/kree
