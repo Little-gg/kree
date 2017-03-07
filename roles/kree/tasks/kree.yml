@@ -1,6 +1,11 @@
 ---
 # tasks file for kree
 
+- name: install sshpass support
+  yum:
+    name: sshpass
+    state: present
+
 - name: copy kree codes
   git:
     repo: https://github.com/Little-gg/kree
@@ -85,6 +90,7 @@
     path: "{{ log_dir }}/callback.log"
     owner: "{{ apache_user }}"
     group: "{{ apache_group }}"
+  ignore_errors: yes
 
 - name: create playbooks directory
   file:
