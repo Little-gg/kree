@@ -1,0 +1,16 @@
+Listen 9080 
+
+<VirtualHost *:9080>
+    ServerName localhost
+
+    WSGIDaemonProcess {{ apache_user }} user={{ apache_user }} group={{ apache_group }} threads=5
+    WSGIScriptAlias / {{ kree_dir }}/kree.wsgi
+
+    <Directory {{ kree_dir }}>
+        WSGIProcessGroup {{ apache_user }}
+        WSGIApplicationGroup %{GLOBAL}
+        Order deny,allow
+        Allow from all
+        WSGIScriptReloading On
+    </Directory>
+</VirtualHost>

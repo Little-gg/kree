@@ -1,0 +1,67 @@
+---
+# tasks file for kree
+
+- name: copy kree codes
+  git:
+    repo: https://github.com/Little-gg/kree
+    dest: "{{ kree_dir }}"
+    force: yes
+  ignore_errors: yes
+  register: result
+
+- name: update kree codes
+  git:
+    repo: https://github.com/Little-gg/kree
+    dest: "{{ kree_dir }}"
+    refspec=+refs/pull/*:
+  when: result|failed
+
+- name: ensure log directory
+  file:
+    path: "{{ log_dir }}"
+    state: directory
+    owner: "{{ apache_user }}"
+    group: "{{ apache_group }}"
+
+- name: change log debug level
+  template:
+    src: logger.py.j2
+    dest: "{{ kree_dir }}/main/config/logger.py"
+
+- name: install kree config
+  template:
+    src: config.py.j2
+    dest: "{{ kree_dir }}/main/config/config.py"
+
+- name: install wsgi
+  template:
+    src: kree.wsgi.j2
+    dest: "{{ kree_dir }}/kree.wsgi"
+
+- name: create ansible config
+  template:
+    src: ansible.cfg.j2
+    dest: /etc/ansible/ansible.cfg
+
+- name: change codes owner
+  file:
+    path: "{{ kree_dir }}"
+    owner: "{{ apache_user }}"
+    group: "{{ apache_group }}"
+    recurse: yes
+  notify:
+    - restart apache
+
+- name: create playbooks directory
+  file:
+    path: "{{ playbooks_dir }}"
+    state: directory
+    owner: "{{ apache_user }}"
+    group: "{{ apache_group }}"
+
+- name: create sample playbook
+  copy:
+    src: files/sample
+    dest: "{{ playbooks_dir }}/"
+    owner: "{{ apache_user }}"
+    group: "{{ apache_group }}"

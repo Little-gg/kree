@@ -1,0 +1,21 @@
+---
+# tasks file for apache2
+
+- name: install apache2 and related packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - httpd
+    - mod_wsgi
+
+- name: config apache config
+  template:
+    src: kree.conf.j2
+    dest: /etc/httpd/conf.d/kree.conf
+
+- name: enable apache service and start up it
+  service:
+    name: httpd
+    enabled: yes
+    state: started

@@ -1,0 +1,19 @@
+---
+# tasks file for redis-server
+
+- name: enable epel repository
+  yum:
+    name: epel-release
+    state: present
+    update_cache: yes
+
+- name: install redis server
+  yum:
+    name: redis
+    state: present
+
+- name: enable redis server service for every boot and start it right now
+  service:
+    name: redis
+    enabled: yes
+    state: started

@@ -1,0 +1,46 @@
+---
+# tasks file for celery
+
+- name: install celery systemd service
+  template:
+    src: celery.service.j2
+    dest: "{{ celery_service }}"
+
+- name: enable celery systemd service
+  systemd:
+    name: celery
+    state: started
+    enabled: yes
+
+#- name: link celery service
+#  file:
+#    src: "{{ celery_service }}"
+#    dest: /etc/systemd/system/multi-user.target.wants/celery.service
+#    state: link
+
+- name: install celery service config
+  template:
+    src: celery.j2
+    dest: "{{ celery_config }}"
+    owner: "{{ apache_user }}"
+    group: "{{ apache_group }}"
+    mode: a+x
+
+- name: create running directory
+  file:
+    path: /var/run/celery
+    state: directory
+    owner: "{{ apache_user }}"
+    group: "{{ apache_group }}"
+
+- name: create log directory
+  file:
+    path: /var/log/celery
+    state: directory
+    owner: "{{ apache_user }}"
+    group: "{{ apache_group }}"
+
+- name: enable apache user login
+  user:
+    name: "{{ apache_user }}"
+    shell: /usr/bin/bash

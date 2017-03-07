@@ -1,0 +1,13 @@
+---
+# defaults file for kree
+
+apache_user: apache
+apache_group: apache
+kree_port: 9080
+kree_dir: /var/www/kree
+playbooks_dir: /var/www/playbooks
+celery_service: /usr/lib/systemd/system/celery.service
+celery_config: /etc/init.d/celery
+debug_level: DEBUG
+ansible_dir: /usr/bin/ansible
+log_dir: /var/log/kree

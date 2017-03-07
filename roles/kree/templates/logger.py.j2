@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+import logging
+
+
+class Log(object):
+    @staticmethod
+    def getLogger(class_name):
+        logger = logging.getLogger(class_name)
+        logger.setLevel(logging.{{ debug_level }})
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.{{ debug_level }})
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+        fh = logging.FileHandler('{{ log_dir }}/kree2.log')
+        fh.setLevel(logging.{{ debug_level }})
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+        logger.propagate = False
+        return logger

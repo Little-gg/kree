@@ -1,0 +1,10 @@
+---
+- hosts: all
+  tasks:
+    - name: get cpu info
+      shell: lscpu
+      register: result
+
+    - name: print out result
+      debug:
+        msg: "{{ result }}"

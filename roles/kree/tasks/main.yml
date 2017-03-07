@@ -1,0 +1,7 @@
+---
+# tasks file for kree
+
+- include: redis-server.yml
+- include: apache2.yml
+- include: celery.yml
+- include: kree.yml
