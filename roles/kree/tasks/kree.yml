@@ -43,6 +43,18 @@
     src: ansible.cfg.j2
     dest: /etc/ansible/ansible.cfg
 
+- name: enable no host key checking in ssh
+  lineinfile:
+    dest: /etc/ssh/ssh_config
+    state: present
+    regexp: ^UserKnownHostsFile(.*)
+    line: 'UserKnownHostsFile /dev/null'
+
+- name: config apache config
+  template:
+    src: kree.conf.j2
+    dest: /etc/httpd/conf.d/kree.conf
+
 - name: change codes owner
   file:
     path: "{{ kree_dir }}"
