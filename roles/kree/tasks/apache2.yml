@@ -16,6 +16,7 @@
 
 - name: disable SELinux
   shell: setenforce 0
+  ignore_errors: yes
 
 - name: disalbe SELinux temporary
   lineinfile:
@@ -23,3 +24,4 @@
     state: present
     regexp: ^SELINUX=(.*)
     line: 'SELINUX=disabled'
+  ignore_errors: yes
