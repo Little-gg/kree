@@ -6,11 +6,6 @@
     src: celery.service.j2
     dest: "{{ celery_service }}"
 
-#- name: link celery service
-#  file:
-#    src: "{{ celery_service }}"
-#    dest: /etc/systemd/system/multi-user.target.wants/celery.service
-#    state: link
 
 - name: install celery service config
   template:
@@ -19,6 +14,7 @@
     owner: "{{ apache_user }}"
     group: "{{ apache_group }}"
     mode: a+x
+
 
 - name: create running directory
   file:
@@ -43,4 +39,5 @@
   systemd:
     name: celery
     enabled: yes
+    daemon_reload: yes
 

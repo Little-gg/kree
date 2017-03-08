@@ -4,6 +4,8 @@ After=network.target
 
 [Service]
 Type=forking
+RemainAfterExit=true
+Restart=always
 User={{ apache_user }}
 Group={{ apache_group }}
 EnvironmentFile=-{{ celery_config }}
