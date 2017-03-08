@@ -40,4 +40,5 @@
     name: celery
     enabled: yes
     daemon_reload: yes
+  ignore_errors: yes
 

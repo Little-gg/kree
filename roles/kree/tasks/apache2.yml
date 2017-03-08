@@ -13,6 +13,7 @@
   systemd:
     name: httpd
     enabled: yes
+  ignore_errors: yes
 
 - name: disable SELinux
   shell: setenforce 0
