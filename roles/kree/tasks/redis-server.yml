@@ -13,7 +13,8 @@
     state: present
 
 - name: enable redis server service for every boot and start it right now
-  service:
+  systemd:
     name: redis
     enabled: yes
     state: started
+    daemon_reload: yes
