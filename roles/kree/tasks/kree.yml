@@ -105,3 +105,10 @@
     dest: "{{ playbooks_dir }}/"
     owner: "{{ apache_user }}"
     group: "{{ apache_group }}"
+
+- name: chown ansible tmp dir
+  file:
+      path: /tmp/.ansible
+      owner: "{{ apache_user }}"
+      group: "{{ apache_group }}"
+      recurse: yes
