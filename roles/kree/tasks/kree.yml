@@ -35,6 +35,11 @@
     src: config.py.j2
     dest: "{{ kree_dir }}/main/config/config.py"
 
+- name: generate callback
+  template:
+    src: json.py.j2
+    dest: "{{ kree_dir }}/plugins/json.py"
+
 - name: install wsgi
   template:
     src: kree.wsgi.j2
